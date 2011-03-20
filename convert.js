@@ -1,39 +1,39 @@
 (function () {
 
-var Converter = window.Converter = function () {},
-	generatedIds = {};
+var Converter = window.Converter = function () {};
 
-function generateId(fieldName, prefix, postfix)
+function generateId(fieldName, idMap, prefix, postfix)
 {
-	var words = fieldName.toLowerCase().split(/\s/),
-		results = words[0], n = 0;
+	var n = 0;
+	prefix = prefix || '';
+	postfix = postfix || '';
 	
-	for (var i = 1; i < words.length; i++)
-	{
-		results += (words[i])[0].toUpperCase();
-		results += (words[i]).substring(1);
-	}
+	fieldName = fieldName.toLowerCase().replace(/\s(\w)/g, function(all, letter) {
+		return letter.toUpperCase();
+	});
 	
-	results = [prefix || '', results, postfix || ''].join("");
+	fieldName = prefix + fieldName + postfix;
 	
-	while (generatedIds[results + (n || '')])
+	while (idMap[fieldName + (n || '')])
 	{
 		n += 1;
 	}
 	
-	generatedIds[results + (n || '')] = true;
-	return results;
+	fieldName = fieldName + (n || '');
+	idMap[fieldName] = true;
+	
+	return fieldName ;
 }
 
 Converter.toForm = function (str, prefix, postfix) {
 	var lines = str.split(/\r?\n/),
-		i = 0, n = lines.length, tokens = [],
+		idMap = {},
+		tokens = [],
 		bGenerateLabel = true,
-		fieldName, fieldType,
-		label, input,
+		fieldName, fieldType, label, input,
 		form = document.createElement('form');
 	
-	for (i = 0; i < n; i++)
+	for (var i = 0, n = lines.length; i < n; i++)
 	{
 		bGenerateLabel = true;
 		tokens = lines[i].split(/:\s?/);
@@ -57,12 +57,12 @@ Converter.toForm = function (str, prefix, postfix) {
 				break;
 		}
 		
-		input.id = generateId(fieldName);
+		input.id = generateId(fieldName, idMap);
 		
 		if (bGenerateLabel)
 		{
 			label = document.createElement('label');
-			label.htmlFor = generateId(fieldName);
+			label.htmlFor = input.id;
 			label.innerHTML = fieldName;
 			form.appendChild(label);
 		}
