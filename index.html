@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Converter</title>
+	<script type="text/javascript" src="convert.js"></script>
+	<style type="text/css">
+	#text {
+		width:450px;
+		float:left;
+	}
+	label {
+		display:block;
+	}
+	textarea {
+		width:400px;
+		display:block;
+	}
+	input[type="submit"] {
+		display:block;
+	}
+	#preview {
+		background:#ffecec;
+		display:block;
+		min-height:300px;
+		overflow:auto;
+	}
+	</style>
+</head>
+<body>
+	<div id="text">
+		<label for="code">Code</label>
+		<textarea name="code" id="code" cols="30" rows="10"></textarea>
+		<input id="submit" type="submit" value="Convert" />
+		<textarea name="results" id="results" cols="30" rows="10"></textarea>
+	</div>
+	<b>Preview</b>
+	<div id="preview">
+	</div>
+	<script type="text/javascript">
+	
+	var submit = document.getElementById("submit");
+	
+	submit.onclick = function () {
+		var code = document.getElementById("code"), 
+			results = document.getElementById("results"),
+			preview = document.getElementById("preview"),
+			form = null;
+		
+		form = Converter.toForm(code.value);
+		preview.innerHTML = "";
+		preview.appendChild(form);
+		results.value = preview.innerHTML;
+	}
+	
+	</script>
+</body>
+</html>
