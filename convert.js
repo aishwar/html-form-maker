@@ -25,12 +25,57 @@ function generateId(fieldName, idMap, prefix, postfix)
 	return fieldName ;
 }
 
+
+function parseFieldInfo(text)
+{
+	// Target: be able to parse this:
+	// text#id.class1.class2(data-type='email',name='id')
+	
+	var pairListRegex = /\((.*?)\)/, pairList = null, // Matches ( soemthing )
+		idRegex = /#([\w\-]+)/, id = null, // Matches #idName
+		classesRegex = /\.([\w\-]+)/g, classes = [], // Matches .class-name
+		type = null, results = [],
+		attribs = {};
+	
+	type = text.match(/\w+/);
+	type = type ? type[0] : null;
+	id = text.match(idRegex);
+	id = id ? id[1] : null;
+	
+	while ((results = classesRegex.exec(text)) != null)
+	{
+		classes.push(results[1]);
+	}
+	
+	pairList = text.match(pairListRegex);
+	pairList = pairList ? pairList[1] : null;
+	if (pairList)
+	{
+		pairList = pairList.split(',');
+		for (var i = 0, n = pairList.length; i < n; i++)
+		{
+			var pair = pairList[i].split('='),
+				key = pair[0],
+				value = pair[1] ? (pair[1].match(/(['"]*)(.*)\1/))[2] : ''; // Match to get the inside of a quoted string
+			
+			attribs[key] = value;
+		}
+	}
+	
+	return {
+		type:type,
+		id:id,
+		class:classes,
+		attributes:attribs
+	};
+}
+
 Converter.toForm = function (str, prefix, postfix) {
 	var lines = str.split(/\r?\n/),
 		idMap = {},
 		tokens = [],
 		bGenerateLabel = true,
-		fieldName, fieldType, label, input,
+		fieldName, fieldInfo, label, input,
 		form = document.createElement('form');
 	
 	for (var i = 0, n = lines.length; i < n; i++)
@@ -39,12 +84,12 @@ Converter.toForm = function (str, prefix, postfix) {
 		tokens = lines[i].split(/:\s?/);
 		
 		fieldName = tokens[0];
-		fieldType = tokens[1];
+		fieldInfo = parseFieldInfo(tokens[1]);
 		
-		switch (fieldType) {
+		switch (fieldInfo.type) {
 			case "text":
 				input = document.createElement('input');
-				input.type = fieldType;
+				input.type = 'text';
 				break;
 			case "textarea":
 				input = document.createElement('textarea');
@@ -57,7 +102,17 @@ Converter.toForm = function (str, prefix, postfix) {
 				break;
 		}
 		
-		input.id = generateId(fieldName, idMap);
+		input.id = fieldInfo.id || generateId(fieldName, idMap);
+		
+		if (fieldInfo.class && fieldInfo.class.length)
+		{
+			input.className = fieldInfo.class.join(' ');
+		}
+		
+		for (var attrib in fieldInfo.attributes)
+		{
+			input.setAttribute(attrib, fieldInfo.attributes[attrib]);
+		}
 		
 		if (bGenerateLabel)
 		{
