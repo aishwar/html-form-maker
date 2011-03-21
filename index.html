@@ -4,16 +4,17 @@
 	<meta charset="UTF-8">
 	<title>Converter</title>
 	<script type="text/javascript" src="convert.js"></script>
+	<script type="text/javascript" src="beautify-html.js"></script>
 	<style type="text/css">
 	#text {
-		width:450px;
+		width:600px;
 		float:left;
 	}
 	label {
 		display:block;
 	}
 	textarea {
-		width:400px;
+		width:580px;
 		display:block;
 	}
 	input[type="submit"] {
@@ -50,7 +51,7 @@
 		form = Converter.toForm(code.value);
 		preview.innerHTML = "";
 		preview.appendChild(form);
-		results.value = preview.innerHTML;
+		results.value = style_html(preview.innerHTML);
 	}
 	
 	</script>
