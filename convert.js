@@ -81,10 +81,10 @@ Converter.toForm = function (str, prefix, postfix) {
 	for (var i = 0, n = lines.length; i < n; i++)
 	{
 		bGenerateLabel = true;
-		tokens = lines[i].split(/:\s?/);
+		tokens = lines[i].match(/(.*?):(.*)/);
 		
-		fieldName = tokens[0];
-		fieldInfo = parseFieldInfo(tokens[1]);
+		fieldName = tokens[1];
+		fieldInfo = parseFieldInfo(tokens[2]);
 		
 		switch (fieldInfo.type) {
 			case "text":
